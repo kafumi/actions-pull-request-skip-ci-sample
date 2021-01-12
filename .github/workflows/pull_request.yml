@@ -1,0 +1,27 @@
+on: pull_request
+jobs:
+  check_commit:
+    runs-on: ubuntu-latest
+    env:
+      SKIP_CI_KEYWORD: "[skip ci]"
+    outputs:
+      skip_ci: ${{ steps.check_message.outputs.skip_ci }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+    - name: Check commit message
+      id: check_message
+      run: |
+        message=$(git log --format=%B -n 1 ${{ github.event.pull_request.head.sha }})
+        if echo "$message" | grep -q -F "${{ env.SKIP_CI_KEYWORD }}"; then
+          echo "::set-output name=skip_ci::true"
+        else
+          echo "::set-output name=skip_ci::false"
+        fi
+  build:
+    runs-on: ubuntu-latest
+    needs: check_commit
+    if: ${{ needs.check_commit.outputs.skip_ci != 'true' }}
+    steps:
+    - run: echo "build job is executed"
