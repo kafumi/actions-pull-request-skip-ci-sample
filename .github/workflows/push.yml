@@ -1,12 +1,12 @@
 on: push
 jobs:
   accept_commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     steps:
     - run: echo "build is NOT skipped"
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: accept_commit
     steps:
     - run: echo "build job is executed"
